@@ -21,7 +21,7 @@ error_combinations_table <- data.frame(State = character(), District = character
 
 error_combinations_entries <- data.frame(State = character(), District = character(), Block = character(), Panchayat = character(), Year = character(), stringsAsFactors = FALSE) #Captures errors in show 100 entries
 
-file_error_combinations <- data.frame(State = character(), District = character(), Block = character(), Panchayat = character(), Year = character(), stringsAsFactors = FALSE) #Captures errors in file renaming
+file_error_combinations <- data.frame(State = character(), District = character(), Block = character(), Panchayat = character(), Year = character(), Name = character (), stringsAsFactors = FALSE) #Captures errors in file renaming
 
 scraped_combinations <- data.frame(State = character(), District = character(), Block = character(), Panchayat = character(), Year = character(), stringsAsFactors = FALSE) #Captures all scraped combinations
 
@@ -179,12 +179,13 @@ for (state in state_text) {
             files_info <- file.info(files)
             files_sorted <- files[order(files_info$mtime, decreasing = TRUE)]
             latest_file <- files_sorted[1]
+            latest_file_char <- as.character (latest_file)
             file.copy(latest_file, destination_folder)
             
             #Check if the copied file already has the new name
             new_file_path <- file.path(destination_folder, new_name)
             if (file.exists(new_file_path)) {
-              file_error_combinations <- rbind(file_error_combinations, data.frame(State = state, District = district, Block = block, Panchayat = panchayat, Year = year, stringsAsFactors = FALSE))
+              file_error_combinations <- rbind(file_error_combinations, data.frame(State = state, District = district, Block = block, Panchayat = panchayat, Year = year, Name = latest_file_char, stringsAsFactors = FALSE))
               message("The file already exists. Combination (", state, "_", district, "_", block, "_", panchayat, "_", year, ") was not created.")
             } else {
               file.rename(file.path(destination_folder, basename(latest_file)), new_file_path)
@@ -197,11 +198,11 @@ for (state in state_text) {
           scraped_combinations <- rbind(scraped_combinations, data.frame(State = state, District = district, Block = block, Panchayat = panchayat, Year = year, stringsAsFactors = FALSE))
           
           #Writing dataframes (scraped combinations and errors in table and 100 entries to csv)
-          write.csv(scraped_combinations, "/Users/ganeshgorti/Downloads/mgnrega_sikkim_new/scraped_combinations_sikkim_mangan.csv", row.names=FALSE)
-          write.csv(error_combinations_table, "/Users/ganeshgorti/Downloads/mgnrega_sikkim_new/error_combinations_table_sikkim_mangan.csv", row.names=FALSE)
-          write.csv(error_combinations_entries, "/Users/ganeshgorti/Downloads/mgnrega_sikkim_new/error_combinations_entries_sikkim_mangan.csv", row.names=FALSE)
-          write.csv(files_info, "/Users/ganeshgorti/Downloads/mgnrega_sikkim_new/files_info__sikkim.csv", row.names=FALSE)
-          write.csv(file_error_combinations, "/Users/ganeshgorti/Downloads/mgnrega_sikkim_new/files_error_combinations_sikkim.csv", row.names=FALSE)
+          write.csv(scraped_combinations, "", row.names=FALSE)
+          write.csv(error_combinations_table, "", row.names=FALSE)
+          write.csv(error_combinations_entries, "", row.names=FALSE)
+          write.csv(files_info, "", row.names=FALSE)
+          write.csv(file_error_combinations, "", row.names=FALSE)
         }
       }
     }
@@ -211,59 +212,3 @@ for (state in state_text) {
 #Quit the browser and close the Selenium server
 remDr$close()
 rD$server$stop()
-
-
-#####################################
-#***********************************#
-#####################################
-
-
-###############
-#OLD CODE FOR SUBMIT BUTTON -> This is not working since errors are not being captured in the dataframe 
-###############
-
-#Submit the options 
-#Using retrying since the division does not seem to be loading often
-# submit_button <- remDr$findElement(using = "xpath", value = '//*[@id="ContentPlaceHolder1_btnSubmit"]')
-# element_loaded <- FALSE
-# retry_count <- 3
-# for (i in seq_len(retry_count)) {
-#   tryCatch({
-#     submit_button$clickElement()
-#     Sys.sleep(20)
-#     wait_for_element <- remDr$findElement(using = "xpath", "//div[@id='dtBasicExample_wrapper']")
-#     element_loaded <- TRUE
-#   }, error = function(e) {
-#     if (i == retry_count) {
-#       #If all retries failed, record the combination that threw the error
-#       error_combinations_table <- rbind(error_combinations_table, data.frame(State = state, District = district, Block = block, Panchayat = panchayat, Year = year, stringsAsFactors = FALSE))
-#       message(paste0("Combination (", state, ", ", district, ", ", block, ", ", panchayat, ", ", year, ") threw an error while loading the table. Moving on to the next combination."))
-#     } else {
-#       message(paste0("Attempt ", i, " failed, retrying in 20 seconds..."))
-#       Sys.sleep(20) #Wait for 20 seconds before retrying
-#     }
-#   })
-#   if (element_loaded) {
-#     break #Exit the loop if element is loaded
-#   }
-# }
-
-######
-#OLD CODE FOR ERROR HANDLING IN NUMBER OF ENTRIES, does not work since break is withing tryCatch
-#####
-# 
-# retry_count <- 3
-# for (i in seq_len(retry_count)) {
-#   tryCatch({
-#     webElem_showentries <- remDr$findElement(using = 'xpath', "//select[@name = 'dtBasicExample_length']/option[@value='100']")
-#     webElem_showentries$clickElement()
-#     break # exit the loop if successful
-#   }, error = function(e) {
-#     if (i == retry_count) {
-#       stop(e) # re-throw the exception if all retries failed
-#     } else {
-#       message(paste0("Attempt ", i, " failed, retrying in 20 seconds..."))
-#       Sys.sleep(20) # wait for 20 seconds before retrying
-#     }
-#   })
-# }
