@@ -14,7 +14,6 @@ state_options <- state_dropdown$getElementText() %>% unlist()
 state_text <- gsub("Select State", " ", state_options)
 state_text <- unlist(strsplit(state_text, "\n"))
 state_text <- state_text[-1]
-state_text <- state_text[24] #Remove this if you want the loop to work with all states
 
 #Create a data frame to store the errors
 error_combinations_table <- data.frame(State = character(), District = character(), Block = character(), Panchayat = character(), Year = character(), stringsAsFactors = FALSE) #Captures errors in show 100 entries
