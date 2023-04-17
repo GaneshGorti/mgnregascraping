@@ -110,6 +110,7 @@ for (state in state_text) {
           
           submit_button <- remDr$findElement(using = "xpath", value = '//*[@id="ContentPlaceHolder1_btnSubmit"]')
           retry_count <- 3
+          #Waiting for table to appear, if not, retrying
           for (i in seq_len(retry_count)) {
             element_loaded <- FALSE
             tryCatch({
